@@ -1,0 +1,49 @@
+{
+	"name": "@clementprevot/pi-session-archive",
+	"version": "0.1.0",
+	"description": "Pi extension that archives finished sessions out of /resume without deleting them, with a browsable picker to restore and resume them",
+	"keywords": [
+		"pi-package",
+		"pi-extension",
+		"session",
+		"archive",
+		"resume"
+	],
+	"license": "MIT",
+	"type": "module",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/clementprevot/pi-session-archive.git"
+	},
+	"packageManager": "yarn@4.9.2",
+	"engines": {
+		"node": ">=22.6"
+	},
+	"files": [
+		"index.ts"
+	],
+	"pi": {
+		"extensions": [
+			"./index.ts"
+		]
+	},
+	"peerDependencies": {
+		"@earendil-works/pi-coding-agent": "*",
+		"@earendil-works/pi-tui": "*",
+		"typebox": "*"
+	},
+	"devDependencies": {
+		"@earendil-works/pi-coding-agent": "*",
+		"@earendil-works/pi-tui": "*",
+		"@types/node": "^24.0.0",
+		"typebox": "*",
+		"typescript": "^5.9.0"
+	},
+	"scripts": {
+		"test": "node --test test/*.test.ts",
+		"typecheck": "tsc --noEmit"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}

@@ -15,7 +15,6 @@
 		"type": "git",
 		"url": "git+https://github.com/clementprevot/pi-session-archive.git"
 	},
-	"packageManager": "yarn@4.9.2",
 	"engines": {
 		"node": ">=22.6"
 	},

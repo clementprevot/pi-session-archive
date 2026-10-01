@@ -34,10 +34,9 @@ This pairs well with [@clementprevot/pi-session-search](https://github.com/cleme
 ## Local development
 
 ```bash
-corepack enable
-yarn install
-yarn test
-yarn typecheck
+npm install
+npm test
+npm run typecheck
 ```
 
 To try the extension in a live session without installing it:

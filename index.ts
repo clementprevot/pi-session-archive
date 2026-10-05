@@ -137,6 +137,14 @@ function stripTagInFile(file: string): void {
 	}
 }
 
+function filesDiffer(a: string, b: string): boolean {
+	try {
+		return !readFileSync(a).equals(readFileSync(b));
+	} catch {
+		return true;
+	}
+}
+
 /**
  * Scrollable, filterable archive picker. Scopes to the current cwd by default
  * (tab toggles to all), sorts by archive date (ctrl+s toggles to name), and
@@ -428,14 +436,23 @@ export default function sessionArchive(pi: ExtensionAPI) {
 			const targetDir = join(getAgentDir(), "sessions", cwdDirName(cwd));
 			mkdirSync(targetDir, { recursive: true });
 			const target = join(targetDir, basename(archivedFile));
-			if (!existsSync(target)) renameSync(archivedFile, target);
+			const liveCopyExists = existsSync(target);
+			if (liveCopyExists) {
+				// The session file already exists in the live tree (e.g. the session
+				// kept running after an archive attempt). Resume that copy and leave
+				// the archived one plus its index entry; the next shutdown of the
+				// live copy supersedes the stale archive.
+				ctx.ui.notify("Live copy of this session already exists; archived copy left in place", "info");
+			} else {
+				renameSync(archivedFile, target);
 
-			const nextIndex = readIndex();
-			if (rel) delete nextIndex[rel];
-			writeIndex(nextIndex);
+				const nextIndex = readIndex();
+				if (rel) delete nextIndex[rel];
+				writeIndex(nextIndex);
 
-			ctx.ui.notify("Restored to /resume", "info");
-			const action = await ctx.ui.select("Session restored to /resume", [
+				ctx.ui.notify("Restored to /resume", "info");
+			}
+			const action = await ctx.ui.select(liveCopyExists ? "Live copy found; resume it?" : "Session restored to /resume", [
 				"Resume it now",
 				"Stay in the current session",
 			]);
@@ -470,7 +487,12 @@ export default function sessionArchive(pi: ExtensionAPI) {
 		const dir = join(archiveRoot(), cwdDirName(cwd));
 		mkdirSync(dir, { recursive: true });
 		const target = join(dir, basename(file));
-		if (!existsSync(target)) renameSync(file, target);
+		if (existsSync(target) && filesDiffer(file, target)) {
+			// A stale copy (e.g. left by a restore that found the file already live)
+			// must not silently block the move forever.
+			renameSync(target, `${target}.superseded-${Date.now()}`);
+		}
+		renameSync(file, target);
 
 		const rel = join(cwdDirName(cwd), basename(file));
 		const index = readIndex();
